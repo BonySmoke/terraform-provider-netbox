@@ -4,7 +4,7 @@ import (
         "encoding/json"
 
         "github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-        netboxclient "github.com/netbox-community/go-netbox/netbox/client"
+        netboxclient "github.com/smutel/go-netbox/netbox/client"
 )
 
 func dataNetboxJSONSecretsSecretsList() *schema.Resource {
