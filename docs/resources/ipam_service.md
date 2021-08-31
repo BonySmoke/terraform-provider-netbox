@@ -9,7 +9,7 @@ resource "netbox_ipam_service" "service_test" {
   name              = "SMTP"
   virtualmachine_id = netbox_virtualization_vm.vm_test.id
   ip_addresses_id   = [netbox_ipam_ip_addresses.ip_test.id]
-  port              = "22"
+  ports             = ["22"]
   protocol          = "tcp"
   description       = "Service created by terraform"
 
@@ -43,7 +43,7 @@ The following arguments are supported:
 * ``device_id`` - (Optional) The ID of the device linked to this object.
 * ``ip_addresses_id`` - (Optional) Array of ID of the IP addresses attached to this object.
 * ``name`` - (Required) The name for this object.
-* ``port`` - (Optional) The port of this object.
+* ``ports`` - (Optional) Array of ports of this object.
 * ``protocol`` - (Required) The protocol of this object (tcp or udp).
 * ``virtualmachine_id`` - (Optional) The ID of the vm linked to this object.
 

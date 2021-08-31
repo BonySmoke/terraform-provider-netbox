@@ -36,7 +36,6 @@ data "netbox_dcim_site" "site_test" {
 resource "netbox_ipam_vlan_group" "vlan_group_test" {
   name    = "Test_VlanGroup"
   slug    = "Test_VlanGroup"
-  site_id = data.netbox_dcim_site.site_test.id
 }
 
 data "netbox_ipam_role" "vlan_role_production" {
@@ -149,7 +148,7 @@ resource "netbox_ipam_service" "service_test" {
   name              = "SMTP"
   virtualmachine_id = netbox_virtualization_vm.vm_test.id
   ip_addresses_id   = [netbox_ipam_ip_addresses.ip_test.id]
-  port              = "22"
+  ports             = ["22"]
   protocol          = "tcp"
   description       = "Service created by terraform"
 

@@ -51,14 +51,13 @@ func dataNetboxIpamServiceRead(d *schema.ResourceData,
 	deviceID := int64(d.Get("device_id").(int))
 	deviceIDStr := strconv.FormatInt(deviceID, 10)
 	name := d.Get("name").(string)
-	port := int64(d.Get("port").(int))
-	portStr := strconv.FormatInt(port, 10)
+	port := float64(d.Get("port").(int))
 	protocol := d.Get("protocol").(string)
 	vmID := int64(d.Get("virtualmachine_id").(int))
 	vmIDStr := strconv.FormatInt(vmID, 10)
 
 	p := ipam.NewIpamServicesListParams().WithName(&name)
-	p.SetPort(&portStr)
+	p.SetPort(&port)
 	p.SetProtocol(&protocol)
 	if deviceID != 0 {
 		p.SetDeviceID(&deviceIDStr)

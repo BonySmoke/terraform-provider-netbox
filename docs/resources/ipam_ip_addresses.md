@@ -40,7 +40,6 @@ The following arguments are supported:
 * ``description`` - (Optional) The description of this object.
 * ``dns_name`` - (Optional) The DNS name of this object.
 * ``nat_inside_id`` - (Optional) The ID of the NAT inside of this object.
-* ``nat_outside_id`` - (Optional) The ID of the NAT outside of this object.
 * ``object_id`` - (Optional) The ID of the object where this resource is attached to.
 * ``object_type`` - (Optional) The object type among virtualization.vminterface
 or dcim.interface (virtualization.vminterface by default)

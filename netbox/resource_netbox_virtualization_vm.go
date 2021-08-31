@@ -2,6 +2,7 @@ package netbox
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -107,9 +108,11 @@ func resourceNetboxVirtualizationVM() *schema.Resource {
 				Optional: true,
 			},
 			"vcpus": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Optional: true,
-				Default:  0,
+				ValidateFunc: validation.StringMatch(
+					regexp.MustCompile("^[0-9]+|[0-9]+.[0-9]+$"),
+					"Must be like ^[0-9]+|[0-9]+.[0-9]+$"),
 			},
 		},
 	}
@@ -132,7 +135,7 @@ func resourceNetboxVirtualizationVMCreate(d *schema.ResourceData,
 	status := d.Get("status").(string)
 	tags := d.Get("tag").(*schema.Set).List()
 	tenantID := int64(d.Get("tenant_id").(int))
-	vcpus := int64(d.Get("vcpus").(int))
+	vcpus := d.Get("vcpus").(string)
 
 	newResource := &models.WritableVirtualMachineWithConfigContext{
 		Cluster:          &clusterID,
@@ -164,7 +167,7 @@ func resourceNetboxVirtualizationVMCreate(d *schema.ResourceData,
 		newResource.Tenant = &tenantID
 	}
 
-	if vcpus != 0 {
+	if vcpus != "" {
 		newResource.Vcpus = &vcpus
 	}
 
@@ -346,7 +349,7 @@ func resourceNetboxVirtualizationVMUpdate(d *schema.ResourceData,
 	}
 
 	if d.HasChange("vcpus") {
-		vcpus := int64(d.Get("vcpus").(int))
+		vcpus := d.Get("vcpus").(string)
 		params.Vcpus = &vcpus
 	}
 

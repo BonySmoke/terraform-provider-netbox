@@ -64,10 +64,12 @@ func resourceNetboxIpamService() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringLenBetween(1, 50),
 			},
-			"port": {
-				Type:         schema.TypeInt,
-				Required:     true,
-				ValidateFunc: validation.IntBetween(1, 65535),
+			"ports": {
+				Type:     schema.TypeList,
+				Required: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeInt,
+				},
 			},
 			"protocol": {
 				Type:         schema.TypeString,
@@ -109,7 +111,8 @@ func resourceNetboxIpamServiceCreate(d *schema.ResourceData,
 	IPaddressesID := d.Get("ip_addresses_id").([]interface{})
 	IPaddressesID64 := []int64{}
 	name := d.Get("name").(string)
-	port := int64(d.Get("port").(int))
+	ports := d.Get("ports").([]interface{})
+	ports64 := []int64{}
 	protocol := d.Get("protocol").(string)
 	tags := d.Get("tag").(*schema.Set).List()
 	virtualmachineID := int64(d.Get("virtualmachine_id").(int))
@@ -118,12 +121,16 @@ func resourceNetboxIpamServiceCreate(d *schema.ResourceData,
 		IPaddressesID64 = append(IPaddressesID64, int64(id.(int)))
 	}
 
+	for _, p := range ports {
+		ports64 = append(ports64, int64(p.(int)))
+	}
+
 	newResource := &models.WritableService{
 		CustomFields: &customFields,
 		Description:  description,
 		Ipaddresses:  IPaddressesID64,
 		Name:         &name,
-		Port:         &port,
+		Ports:        ports64,
 		Protocol:     &protocol,
 		Tags:         convertTagsToNestedTags(tags),
 	}
@@ -201,7 +208,12 @@ func resourceNetboxIpamServiceRead(d *schema.ResourceData,
 				return err
 			}
 
-			if err = d.Set("port", resource.Port); err != nil {
+			portsObject := resource.Ports
+			portsInt := []int64{}
+			for _, port := range portsObject {
+				portsInt = append(portsInt, port)
+			}
+			if err = d.Set("ports", portsInt); err != nil {
 				return err
 			}
 
@@ -240,8 +252,13 @@ func resourceNetboxIpamServiceUpdate(d *schema.ResourceData,
 	name := d.Get("name").(string)
 	params.Name = &name
 
-	port := int64(d.Get("port").(int))
-	params.Port = &port
+	ports := d.Get("ports").([]interface{})
+	ports64 := []int64{}
+	for _, port := range ports {
+		ports64 = append(ports64, int64(port.(int)))
+	}
+
+	params.Ports = ports64
 
 	protocol := d.Get("protocol").(string)
 	params.Protocol = &protocol

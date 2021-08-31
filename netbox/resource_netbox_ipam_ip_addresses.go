@@ -25,8 +25,8 @@ func resourceNetboxIpamIPAddresses() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"address": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
 				ValidateFunc: validation.IsCIDR,
 			},
 			"custom_fields": {
@@ -62,10 +62,6 @@ func resourceNetboxIpamIPAddresses() *schema.Resource {
 					"Must be like ^[-a-zA-Z0-9_.]{1,255}$"),
 			},
 			"nat_inside_id": {
-				Type:     schema.TypeInt,
-				Optional: true,
-			},
-			"nat_outside_id": {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
@@ -140,7 +136,6 @@ func resourceNetboxIpamIPAddressesCreate(d *schema.ResourceData,
 	description := d.Get("description").(string)
 	dnsName := d.Get("dns_name").(string)
 	natInsideID := int64(d.Get("nat_inside_id").(int))
-	natOutsideID := int64(d.Get("nat_outside_id").(int))
 	objectID := int64(d.Get("object_id").(int))
 	objectType := d.Get("object_type").(string)
 	primaryIP4 := d.Get("primary_ip4").(bool)
@@ -164,10 +159,6 @@ func resourceNetboxIpamIPAddressesCreate(d *schema.ResourceData,
 		newResource.NatInside = &natInsideID
 	}
 
-	if natOutsideID != 0 {
-		newResource.NatOutside = &natOutsideID
-	}
-
 	var info InfosForPrimary
 	if primaryIP4 && objectID != 0 {
 		if objectType == VMInterfaceType {
@@ -181,7 +172,7 @@ func resourceNetboxIpamIPAddressesCreate(d *schema.ResourceData,
 
 	if objectID != 0 {
 		newResource.AssignedObjectID = &objectID
-		newResource.AssignedObjectType = objectType
+		newResource.AssignedObjectType = &objectType
 	}
 
 	if tenantID != 0 {
@@ -289,7 +280,7 @@ func resourceNetboxIpamIPAddressesRead(d *schema.ResourceData,
 
 				var info InfosForPrimary
 				if *resource.AssignedObjectID != 0 {
-					if resource.AssignedObjectType == VMInterfaceType {
+					if *resource.AssignedObjectType == VMInterfaceType {
 						var err error
 						info, err = getInfoForPrimary(m, *resource.AssignedObjectID)
 						if err != nil {
@@ -310,8 +301,8 @@ func resourceNetboxIpamIPAddressesRead(d *schema.ResourceData,
 			}
 
 			objectType := resource.AssignedObjectType
-			if objectType == "" {
-				objectType = VMInterfaceType
+			if *objectType == "" {
+				*objectType = VMInterfaceType
 			}
 			if err = d.Set("object_type", objectType); err != nil {
 				return err
@@ -418,12 +409,12 @@ func resourceNetboxIpamIPAddressesUpdate(d *schema.ResourceData,
 		params.AssignedObjectID = &objectID
 
 		var objectType string
-		if params.AssignedObjectType == "" {
+		if *params.AssignedObjectType == "" {
 			objectType = VMInterfaceType
 		} else {
 			objectType = d.Get("object_type").(string)
 		}
-		params.AssignedObjectType = objectType
+		*params.AssignedObjectType = objectType
 	}
 
 	if d.HasChange("role") {
